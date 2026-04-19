@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NISHRO TFTP</title>
+  <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+  <script>
+    /* Apply theme before stylesheet paints to prevent flash-of-wrong-theme. */
+    (function () {
+      try {
+        var saved = localStorage.getItem("nishro.theme");
+        var prefersLight = window.matchMedia
+          && window.matchMedia("(prefers-color-scheme: light)").matches;
+        var theme = saved === "light" || saved === "dark"
+          ? saved
+          : (prefersLight ? "light" : "dark");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body data-mode="view">
+
+<header>
+  <div class="brand">
+    <img src="/static/img/logo@2x.png" alt="Nishro" class="brand-logo" onerror="this.style.display='none'">
+    <h1>NISHRO TFTP</h1>
+    <span class="sub">VLAN-aware TFTP server &mdash; BDCOM Dhaka R&amp;D Center</span>
+  </div>
+  <div class="header-right">
+    <button class="btn sec" id="authChangePassword" style="display:none;font-size:11px;padding:5px 10px;">Change password</button>
+    <button class="btn sec" id="authLogout" style="display:none;font-size:11px;padding:5px 10px;">Logout</button>
+    <button type="button" id="themeToggle" class="theme-switch" role="switch"
+            aria-checked="false" aria-label="Toggle light / dark theme"
+            title="Toggle light / dark theme">
+      <span class="theme-switch-track">
+        <span class="theme-switch-star"></span>
+        <span class="theme-switch-star"></span>
+        <span class="theme-switch-star"></span>
+        <span class="theme-switch-star"></span>
+        <span class="theme-switch-star"></span>
+        <span class="theme-switch-cloud c1"></span>
+        <span class="theme-switch-cloud c2"></span>
+      </span>
+      <span class="theme-switch-orb">
+        <span class="theme-switch-crater c1"></span>
+        <span class="theme-switch-crater c2"></span>
+        <span class="theme-switch-crater c3"></span>
+        <span class="theme-switch-ray" style="--a:0deg"></span>
+        <span class="theme-switch-ray" style="--a:45deg"></span>
+        <span class="theme-switch-ray" style="--a:90deg"></span>
+        <span class="theme-switch-ray" style="--a:135deg"></span>
+        <span class="theme-switch-ray" style="--a:180deg"></span>
+        <span class="theme-switch-ray" style="--a:225deg"></span>
+        <span class="theme-switch-ray" style="--a:270deg"></span>
+        <span class="theme-switch-ray" style="--a:315deg"></span>
+      </span>
+    </button>
+    <div class="mode-toggle" role="group" aria-label="UI mode">
+      <button type="button" data-mode="view">View</button>
+      <button type="button" data-mode="admin">Admin</button>
+    </div>
+    <span id="wsChip" class="chip">connecting...</span>
+  </div>
+</header>
+
+<!-- Page frame: vertical nav | main | live-stats rail. All three sit as
+     siblings so the nav and rail stay pinned across every tab switch. -->
+<div class="page-frame">
+
+<nav class="side-nav" aria-label="Primary">
+  <div class="nav-eyebrow">Navigate</div>
+  <div class="nav-track">
+    <span class="nav-marker" aria-hidden="true"></span>
+    <button data-tab="dashboard" class="active" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 18 0"/><path d="M12 12l5-3"/><circle cx="12" cy="12" r="1.5"/></svg></span>
+      <span class="nav-lab">Dashboard</span>
+    </button>
+    <button data-tab="sessions" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span>
+      <span class="nav-lab">Sessions</span>
+    </button>
+    <button data-tab="files" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+      <span class="nav-lab">Files</span>
+    </button>
+    <button data-tab="stats" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M2 20h20"/></svg></span>
+      <span class="nav-lab">Statistics</span>
+    </button>
+    <button data-tab="logs" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l2 2-2 2M12 13h5"/></svg></span>
+      <span class="nav-lab">Logs</span>
+    </button>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <button data-tab="config" data-admin="1" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+      <span class="nav-lab">Config</span>
+      <span class="nav-pill">admin</span>
+    </button>
+    <button data-tab="acl" data-admin="1" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.5 8-8 9-4.5-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <span class="nav-lab">ACL</span>
+      <span class="nav-pill">admin</span>
+    </button>
+    <button data-tab="users" data-admin="1" type="button">
+      <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M2 19c.9-2.6 3.5-4 7-4s6.1 1.4 7 4"/><circle cx="17" cy="7.5" r="2.5"/><path d="M15.5 13.3c1.3-.2 2.6-.2 3.9.2 1.6.5 2.7 1.5 3.1 2.8"/></svg></span>
+      <span class="nav-lab">Users</span>
+      <span class="nav-pill">admin</span>
+    </button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Global degraded-start banner (e.g. NIC not configured). -->
+  <div id="nicBanner" style="display:none;"></div>
+
+  <!-- ============ Dashboard ============ -->
+  <section class="tab active" id="tab-dashboard">
+
+    <!-- Today at a glance: 5 big stat cards (populated by dashboard.js).
+         Styled with the shared .stat-block / .stat-card-row primitives
+         so this page and the Statistics page speak the same visual
+         language. -->
+    <div id="dashHero" class="dash-hero"></div>
+
+    <div class="form-section daily-section">
+      <div class="daily-head">
+        <div class="daily-title-row">
+          <h3>Daily sessions</h3>
+        </div>
+      </div>
+      <div class="daily-chart-wrap">
+        <div id="dailyChart" class="daily-chart"></div>
+      </div>
+      <div id="dailyTotals" class="daily-totals"></div>
+    </div>
+
+    <div class="form-section">
+      <h3>Active sessions</h3>
+      <div class="body" style="grid-template-columns:1fr;">
+        <table class="sess-table" id="dashSessions">
+          <thead>
+            <tr>
+              <th>User</th><th>Kind</th><th>File</th><th>Client IP</th>
+              <th>VLAN</th><th>Progress</th><th>Speed</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Sessions ============ -->
+  <section class="tab" id="tab-sessions">
+    <h2>Sessions (Last 100)</h2>
+    <table class="sess-table" id="sessTable">
+      <thead>
+        <tr>
+          <th>Timestamp</th><th>User</th><th>Kind</th><th>File</th><th>MAC</th>
+          <th>Endpoint</th><th>VLAN</th><th>blksize</th><th>wsize</th>
+          <th>Progress</th><th>Speed</th><th>Duration</th><th>State</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ============ Files ============ -->
+  <section class="tab" id="tab-files">
+    <h2>File browser</h2>
+    <div class="row files-topbar" id="filesTopBar">
+      <button class="btn sec btn-sm" id="filesRefreshAll" title="Refresh all three panels now">Refresh All Panels</button>
+      <button class="btn sec btn-sm" id="filesAutoToggle" title="Toggle background auto-refresh on or off">Turn auto-refresh ON</button>
+      <span class="chip" id="filesAutoChip">Auto-refresh: OFF</span>
+      <span class="chip" id="filesStatus"></span>
+    </div>
+    <div class="files-split">
+      <div class="files-left">
+        <div class="explorer-panel">
+          <div class="explorer-header">
+            <h3>RRQ root (local)</h3>
+            <div class="explorer-toolbar" id="rrqToolbar"></div>
+          </div>
+          <div class="explorer-body" id="rrqExplorer">
+            <div class="file-empty">loading...</div>
+          </div>
+        </div>
+        <div class="explorer-panel">
+          <div class="explorer-header">
+            <h3>WRQ uploads</h3>
+            <div class="explorer-toolbar" id="wrqToolbar"></div>
+          </div>
+          <div class="explorer-body" id="wrqExplorer">
+            <div class="file-empty">loading...</div>
+          </div>
+        </div>
+      </div>
+      <div class="files-right">
+        <div class="explorer-panel full">
+          <div class="explorer-header">
+            <h3>FTP server</h3>
+            <div class="explorer-toolbar" id="ftpToolbar"></div>
+          </div>
+          <div class="explorer-body" id="ftpExplorer">
+            <div class="file-empty">loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Statistics ============ -->
+  <section class="tab" id="tab-stats">
+    <div id="statBody"></div>
+  </section>
+
+  <!-- ============ Logs ============ -->
+  <section class="tab" id="tab-logs">
+    <h2>Log stream</h2>
+    <div class="row log-toolbar">
+      <select id="logLevel">
+        <option value="ALL">all</option>
+        <option>DEBUG</option>
+        <option>INFO</option>
+        <option>WARNING</option>
+        <option>ERROR</option>
+      </select>
+      <input type="text" id="logFilter" placeholder="filter text or logger...">
+      <button class="btn sec" id="logPause">pause</button>
+      <button class="btn sec" id="logClear">clear</button>
+      <button class="btn sec" id="logDownload">download</button>
+      <span class="chip ok" id="logAutoScroll">auto-scroll: on</span>
+    </div>
+    <div class="logs" id="logBox"></div>
+  </section>
+
+  <!-- ============ Config (admin) ============ -->
+  <section class="tab" id="tab-config" data-admin="1">
+    <h2>Server configuration</h2>
+    <div class="row">
+      <button class="btn"     id="cfgSave">Save &amp; reload</button>
+      <button class="btn sec" id="cfgReload">Reload from disk</button>
+      <span class="chip" id="cfgStatus"></span>
+    </div>
+    <div class="form-section" id="viewTabsPanel" style="display:none;"></div>
+    <div id="cfgForm"></div>
+  </section>
+
+  <!-- ============ ACL (admin) ============ -->
+  <section class="tab" id="tab-acl" data-admin="1">
+    <h2>Access control lists</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>VLAN ACL</h3>
+        <label>Mode
+          <select id="vlanMode">
+            <option>disabled</option>
+            <option>whitelist</option>
+            <option>blacklist</option>
+          </select>
+        </label>
+        <br><br>
+        <label>VLAN IDs (comma-separated)<br>
+          <input type="text" id="vlanList" style="width:100%">
+        </label>
+        <br><br>
+        <div class="apply-row">
+          <span>Applies to:</span>
+          <label><input type="checkbox" class="vlanApply" value="arp">  ARP</label>
+          <label><input type="checkbox" class="vlanApply" value="icmp"> ICMP</label>
+          <label><input type="checkbox" class="vlanApply" value="tftp"> TFTP</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>IP ACL</h3>
+        <label>Mode
+          <select id="ipMode">
+            <option>disabled</option>
+            <option>whitelist</option>
+            <option>blacklist</option>
+          </select>
+        </label>
+        <br><br>
+        <label>CIDR list (comma-separated)<br>
+          <input type="text" id="ipList" style="width:100%">
+        </label>
+        <br><br>
+        <div class="apply-row">
+          <span>Applies to:</span>
+          <label><input type="checkbox" class="ipApply" value="arp">  ARP</label>
+          <label><input type="checkbox" class="ipApply" value="icmp"> ICMP</label>
+          <label><input type="checkbox" class="ipApply" value="tftp"> TFTP</label>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <button class="btn"     id="aclSave">Save ACLs</button>
+      <button class="btn sec" id="aclReload">Reload</button>
+      <span class="chip" id="aclStatus"></span>
+    </div>
+  </section>
+
+  <!-- ============ Users (admin) ============ -->
+  <section class="tab" id="tab-users" data-admin="1">
+    <h2>Employee ID / Name mapping</h2>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 12px;">
+      Map employee IDs (from BDCOM device names) to display names shown in the sessions view.
+    </p>
+    <div class="row" style="gap:8px;align-items:flex-end;flex-wrap:wrap;">
+      <label style="flex:0 0 160px;">ID (e.g. 45 or BDCOM0045)<br>
+        <input type="text" id="userNewId" placeholder="45" style="width:100%;">
+      </label>
+      <label style="flex:1 1 200px;">Name<br>
+        <input type="text" id="userNewName" placeholder="Employee name" style="width:100%;">
+      </label>
+      <button class="btn" id="userAdd">Add</button>
+      <button class="btn sec" id="usersReload">Reload</button>
+      <span class="chip" id="usersStatus"></span>
+    </div>
+    <br>
+    <div id="usersTable"></div>
+  </section>
+
+</main>
+
+<aside class="side-rail" aria-label="Live server pulse">
+  <div class="rail-group">
+    <div class="rail-title">System status</div>
+    <div id="dashRailCore" class="rail-stack"></div>
+  </div>
+  <div class="rail-group">
+    <div class="rail-title">Reach today</div>
+    <div id="dashRailReach" class="rail-stack"></div>
+  </div>
+</aside>
+
+</div><!-- /.page-frame -->
+
+<!-- ============ Login overlay ============ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <h2 id="loginTitle">Admin login</h2>
+    <div class="login-error" id="loginError"></div>
+    <label>Username<br>
+      <input type="text" id="loginUser" autocomplete="username">
+    </label>
+    <label>Password<br>
+      <input type="password" id="loginPass" autocomplete="current-password">
+    </label>
+    <div class="row">
+      <button class="btn" id="loginSubmit">Login</button>
+      <button class="btn sec" id="loginCancel">Cancel</button>
+    </div>
+
+    <!-- First-run setup section (shown by tabs.js when has_password is false).
+         Has its own Cancel beside Create admin; the top-row loginCancel is
+         hidden while this section is visible so there is only one Cancel. -->
+    <div id="setupSection" style="display:none;">
+      <p style="color:var(--muted);font-size:13px;margin:4px 0 12px;">
+        No admin credentials exist yet. Pick a username and password now; this becomes the shared admin login for every browser.
+      </p>
+      <label>New username<br>
+        <input type="text" id="setupUser" autocomplete="username">
+      </label>
+      <label>New password (min 4 chars)<br>
+        <input type="password" id="setupPass" autocomplete="new-password">
+      </label>
+      <label>Confirm new password<br>
+        <input type="password" id="setupPass2" autocomplete="new-password">
+      </label>
+      <div class="row">
+        <button class="btn" id="setupSubmit">Create admin</button>
+        <button class="btn sec" id="setupCancel">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Change password section (hidden by default) -->
+    <div id="changePwSection" style="display:none;">
+      <hr style="border-color:var(--border);margin:14px 0;">
+      <h3>Change password</h3>
+      <label>Current password<br>
+        <input type="password" id="cpOldPass" autocomplete="current-password">
+      </label>
+      <label>New username (leave blank to keep current)<br>
+        <input type="text" id="cpNewUser" autocomplete="username">
+      </label>
+      <label>New password<br>
+        <input type="password" id="cpNewPass" autocomplete="new-password">
+      </label>
+      <label>Confirm new password<br>
+        <input type="password" id="cpNewPass2" autocomplete="new-password">
+      </label>
+      <div class="row">
+        <button class="btn" id="cpSubmit">Change</button>
+        <button class="btn sec" id="cpCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Module load order:
+     util.js       first (publishes helpers on window.Nishro)
+     state.js      second (owns state + subscribe + connectWS)
+     tabs.js       third  (tab switching + mode toggle)
+     <per-tab>.js  fourth (each registers render / init)
+     app.js        last   (DOMContentLoaded bootstrap)
+-->
+<script src="/static/js/util.js"></script>
+<script src="/static/js/state.js"></script>
+<script src="/static/js/tabs.js"></script>
+<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/sessions.js"></script>
+<script src="/static/js/stats.js"></script>
+<script src="/static/js/logs.js"></script>
+<script src="/static/js/files.js"></script>
+<script src="/static/js/config.js"></script>
+<script src="/static/js/acl.js"></script>
+<script src="/static/js/users.js"></script>
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>
