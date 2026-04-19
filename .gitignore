@@ -1,0 +1,121 @@
+# ---------------------------------------------------------------------------
+# Nishro TFTP -- .gitignore
+# ---------------------------------------------------------------------------
+
+# Python bytecode / build caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# Python packaging / install
+pip-wheel-metadata/
+*.whl
+
+# PyInstaller / build artifacts
+build/
+dist/
+dist_*/
+*.spec.bak
+*.manifest
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# IDE / editor droppings
+.vscode/
+.idea/
+.cursor/
+.history/
+*.code-workspace
+*.swp
+*.swo
+*.swn
+*~
+
+# OS / shell noise
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+
+# Logs (tracked dir structure, not contents)
+logs/*.log
+logs/*.log.*
+*.log
+
+# Local runtime state
+*.pid
+*.lock
+
+# Secrets -- NEVER commit these
+auth.json
+users.json
+config.yaml
+config.local.yaml
+!config.yaml.example
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+
+# Persistent runtime counters
+daily_sessions.json
+daily_sessions.json.tmp
+
+# In-flight TFTP transfers + user data folders
+tftp_root/
+tftp_uploads/
+tftp_uploads/*.part
+
+# C engine build artifacts
+c_core/*.o
+c_core/*.obj
+c_core/*.d
+c_core/bin/
+c_core/*.exe
+
+# Installer / packaging artifacts
+*.rar
+*.zip
+*.7z
+*.msi
+*.exe.sig
+
+# Coverage / profiling
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.prof
+*.lprof
+
+# Node / JS (in case someone adds a frontend toolchain later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Scratch
+scratch/
+tmp/
+*.tmp
+*.bak
+*.orig
+
+# Convenience run scripts (per-developer)
+Run
+run.bat
+run.sh

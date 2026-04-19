@@ -1,0 +1,119 @@
+# ---------------------------------------------------------------------------
+# Nishro TFTP -- example configuration
+# ---------------------------------------------------------------------------
+# Copy this file to ``config.yaml`` next to main.py (or the exe) and edit
+# the values for your environment. The real ``config.yaml`` is gitignored
+# because it holds live credentials (FTP, adapter GUIDs) you do not want
+# to leak into version control.
+# ---------------------------------------------------------------------------
+
+network:
+  # Npcap adapter GUID. Pick from Admin Config -> Network adapter once
+  # the server is running; a blank value triggers degraded-start boot.
+  nic: null
+  # Address NOT currently assigned to the NIC in Windows. Clients TFTP
+  # to this address.
+  virtual_ip: 192.0.2.10
+  # Leave null to use the adapter's real MAC.
+  virtual_mac: null
+  promiscuous: true
+
+sessions:
+  max_concurrent: 100
+  overflow_policy: reject  # reject | queue
+  queue_timeout: 10
+
+tftp:
+  engine: python           # python | c  (c = native nishro_core.exe engine)
+  listen_port: 69
+  enable_writes: true
+  negotiation:
+    blksize: client        # client | server | reject
+    windowsize: client
+    timeout: client
+  allow_block_rollover: true
+  defaults:
+    blksize: 1468
+    windowsize: 4
+    timeout: 3
+  limits:
+    blksize_min: 8
+    blksize_max: 65464
+    windowsize_min: 1
+    windowsize_max: 64
+    timeout_min: 1
+    timeout_max: 60
+  max_retries: 5
+
+files:
+  max_rrq_size: 262144000
+  max_wrq_size: 262144000
+  max_ftp_size: 262144000
+  allow_wrq_ftp: false
+  local:
+    root: ./tftp_root
+    recursive: true
+  ftp:
+    host: ftp.example.com
+    port: 21
+    user: CHANGE_ME
+    password: CHANGE_ME
+    root: /
+  ftp_prefix:
+    enabled: false
+    trigger: 'f::'
+    folder_prefix: BDCOM
+    digit_pad: 4
+    host: ftp.example.com
+    port: 21
+    user: CHANGE_ME
+    password: CHANGE_ME
+    root: /
+  write_root: ./tftp_uploads
+  max_copy_size_local: 524288000
+  max_copy_size_ftp: 524288000
+  cache:
+    enabled: false
+    max_bytes: 536870912
+    max_file_bytes: 104857600
+
+security:
+  vlan_acl:
+    mode: disabled       # disabled | whitelist | blacklist
+    list: []
+    apply_to: [arp, icmp, tftp]
+  ip_acl:
+    mode: disabled
+    list: []
+    apply_to: [arp, icmp, tftp]
+
+logging:
+  level: INFO
+  format: '%(asctime)s %(levelname)-7s %(name)-20s %(message)s'
+  file: ./logs/nishro_tftp.log
+  rotate:
+    enabled: true
+    max_bytes: 10485760
+    backup_count: 5
+  memory_buffer: 2000
+
+web:
+  host: 0.0.0.0
+  port: 8011
+  stats_interval: 1
+  # Global auth switch. OFF by default so the first admin can walk
+  # straight into Admin Config without a seeded password juggle. Flip
+  # to ``true`` after setting a password in Admin Config -> Auth; from
+  # then on every browser must log in with the shared admin credential.
+  require_auth: false
+  # Tabs visible to non-admin (view-mode) browsers. Managed from Admin
+  # Config -> Web UI; applies live to every viewer on save.
+  visible_tabs: [dashboard, sessions, files, stats, logs]
+  # Daily-sessions chart colors. Pushed live via WebSocket.
+  daily_chart_colors:
+    completed: '#3fb950'
+    failed:    '#1f6feb'
+  # Statistics page throughput windows (seconds for the short chart,
+  # hours for the long chart). Tunable from Admin Config -> Web UI.
+  stats_recent_window_sec: 60
+  stats_long_window_hours: 12
