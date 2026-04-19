@@ -353,8 +353,12 @@
     users2:  '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M2 19c.9-2.6 3.5-4 7-4s6.1 1.4 7 4"/><circle cx="17" cy="7.5" r="2.5"/><path d="M15.5 13.3c1.3-.2 2.6-.2 3.9.2 1.6.5 2.7 1.5 3.1 2.8"/></svg>',
   };
 
+<<<<<<< HEAD
   /* Two rail groups pinned in the LEFT column beneath the side nav,
      visible across every tab.
+=======
+  /* Two rail groups pinned in the right margin across every tab.
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
      - System status: uptime + CPU proc/host + cache hit (compact health strip)
      - Sessions:      live active + successful counts (mirrors the hero so
                       these totals stay visible even when off-tab). */
@@ -427,7 +431,11 @@
   function render(state) {
     const s = state.stats || {};
     renderBanner(s);            /* always refresh banner, even off-tab */
+<<<<<<< HEAD
     renderRails(state);         /* rails pinned in left column on every tab */
+=======
+    renderRails(state);         /* rails pinned in right margin on every tab */
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
     maybeRefreshDaily(state);   /* keep "today" values fresh off-tab too */
     if (!isDashActive()) return;
     renderHeroStats(state);     /* hero cards only needed when tab is visible */

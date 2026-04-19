@@ -27,6 +27,7 @@ are driven by the same FastAPI web UI and share a single `config.yaml`.
   (ARP, ICMP, TFTP).
 - **Live web dashboard.** Session list, throughput sparklines, log viewer,
   multi-file upload into the RRQ root, FTP prefix routing (`f::NNN/file`),
+<<<<<<< HEAD
   schema-driven config editor. A two-column layout pins an icon-driven
   vertical side nav on the left with two live-pulse rail groups tucked
   directly beneath it — *System status* (uptime, CPU proc, CPU host,
@@ -37,6 +38,16 @@ are driven by the same FastAPI web UI and share a single `config.yaml`.
   Sessions tables collapse into a card grid below 1100 px so nothing
   ever slides out of view; at <800 px everything stacks in a single
   scrollable column with nav → rail → main ordering.
+=======
+  schema-driven config editor. A three-column layout pins an icon-driven
+  vertical side nav on the left, a five-card hero on top of the dashboard
+  (TFTP engine, Web users today, TFTP devices today, Bytes sent, Bytes
+  received), and two rail groups on the right — *System status* (uptime,
+  CPU proc, CPU host, cache hit) and *Reach today* (active + successful
+  sessions). All of it stays visible across every tab switch. On narrow
+  viewports the right rail tucks under the nav on the left instead of
+  falling to the bottom of the page.
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
 - **Daily sessions chart.** Per-day totals (completed / failed / bytes
   / unique users) persisted to `daily_sessions.json` and rendered as a
   stacked bar chart on the dashboard, with side-by-side

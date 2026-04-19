@@ -34,6 +34,7 @@ follows [Keep a Changelog](https://keepachangelog.com/).
   `start_wrq()` in `c_core/session.c` now seed `s->blksize`,
   `s->windowsize`, and `s->timeout_sec` up front, overwritten later
   by `negotiate()` on the happy path.
+<<<<<<< HEAD
 - **Rail unified on the left column at every breakpoint.** Previously
   the "System status" / "Reach today" rail lived on the right margin at
   wide viewports and only shifted left on mid-viewports. It now sits
@@ -47,6 +48,14 @@ follows [Keep a Changelog](https://keepachangelog.com/).
   a bordered card with data-label pills driven by `::before` pseudo
   elements, File and Progress cells span full width, and active rows
   get an accent left border so they stand out in the history stream.
+=======
+- **Responsive rail placement.** On mid viewports (800–1099 px) the
+  side rail used to drop to the bottom of the page under `<main>`.
+  It now tucks into column 1 directly under the side nav, with
+  `<main>` spanning both grid rows on the right. Narrow viewports
+  (<800 px) reorder to nav → rail → main so the rail never falls off
+  the bottom.
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
 - **File browser typography.** Row content bumped from 11 px → 13 px,
   icons 14 → 16, breadcrumbs 11 → 13. Readable without zooming.
 - **Single auth-toggle path.** `require_auth` is now owned exclusively

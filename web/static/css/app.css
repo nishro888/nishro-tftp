@@ -1117,6 +1117,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 }
 
 /* =====================================================================
+<<<<<<< HEAD
    Page frame -- two-column layout with nav + rail stacked on the LEFT
    ---------------------------------------------------------------------
    All three breakpoints keep the live-stats rail directly under the
@@ -1129,15 +1130,30 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
      Mid    (800-1099): | nav  | main |
                         | rail | main |
      Narrow (<800px) :  nav → rail → main, single column
+=======
+   Page frame -- vertical nav | <main> | live-stats rail
+   ---------------------------------------------------------------------
+   Wide viewports (>=1100px):
+     side-nav and side-rail are sticky columns flanking <main>. The 8
+     rail chips stay pinned across every tab switch.
+   Narrow viewports:
+     Everything stacks in a single column -- nav first, main, then rail.
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
    ===================================================================== */
 .page-frame {
   display: grid;
   grid-template-columns: 1fr;   /* default: single column, stacked */
   gap: 16px;
 }
+<<<<<<< HEAD
 .page-frame > main  { order: 2; min-width: 0; }
 .page-frame > .side-nav  { order: 0; }
 .page-frame > .side-rail { order: 1; min-width: 0; }
+=======
+.page-frame > main  { order: 1; min-width: 0; }
+.page-frame > .side-nav { order: 0; }
+.page-frame > .side-rail { order: 2; min-width: 0; }
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
 .rail-title {
   font-size: 10px;
   letter-spacing: 1.4px;
@@ -1221,6 +1237,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .rail-card.err .rail-value { color: var(--err); }
 .rail-card.accent .rail-value { color: var(--accent); }
 
+<<<<<<< HEAD
 /* ---- Wide-viewport page frame: nav + rail stacked on the LEFT,
        main spans the full right column. Puts all the persistent chrome
        (navigation + live pulse) on one side so reading flow is
@@ -1230,6 +1247,12 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
   .page-frame {
     grid-template-columns: 230px minmax(0, 1fr);
     grid-template-rows: auto 1fr;
+=======
+/* ---- Wide-viewport page frame (sticky nav + sticky rail) -------- */
+@media (min-width: 1100px) {
+  .page-frame {
+    grid-template-columns: 210px minmax(0, 1fr) 220px;
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
     gap: 20px;
     align-items: start;
     width: calc(100vw - 32px);
@@ -1241,22 +1264,38 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
     padding: 0;
     margin: 0;
     max-width: none;
+<<<<<<< HEAD
     grid-column: 2;
     grid-row: 1 / span 2;
   }
   .page-frame > .side-nav  { grid-column: 1; grid-row: 1; }
   .page-frame > .side-rail { grid-column: 1; grid-row: 2; }
+=======
+  }
+  .page-frame > .side-nav  { order: 0; }
+  .page-frame > main       { order: 0; }
+  .page-frame > .side-rail { order: 0; }
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
   .side-rail .rail-stack {
     grid-template-columns: 1fr;   /* single column when in the rail */
     gap: 10px;
   }
+<<<<<<< HEAD
   .side-nav {
+=======
+  .side-nav,
+  .side-rail {
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
     position: sticky;
     top: 16px;
     align-self: start;
     max-height: calc(100vh - 32px);
     overflow-y: auto;
+<<<<<<< HEAD
     overflow-x: hidden;
+=======
+    overflow-x: hidden;   /* prevent the stray horizontal scrollbar */
+>>>>>>> 28e888cdc8c82e068c0d6cbf0b677dcbd921c6ac
     scrollbar-width: thin;
   }
 }
